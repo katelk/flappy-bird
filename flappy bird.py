@@ -7,6 +7,7 @@ pygame.init()
 screen = pygame.display.set_mode([500, 600])
 screen.fill(pygame.Color('blue'))
 particles = pygame.sprite.Group()
+all_sprites = pygame.sprite.Group()
 
 
 def load_image(name, colorkey):
