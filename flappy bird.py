@@ -245,6 +245,85 @@ def play():
         all_sprites.draw(screen)
         pygame.display.flip()
 
+def shop():
+    screen_rect = (0, 0, 500, 600)
+    bird.rect.x = 0
+    bird.rect.y = -60
+    buttons.empty()
+    numbers = "123456"
+    x1 = 0
+    y1= 0
+    button_back = Button(buttons, 0, 0, pygame.transform.scale(load_image("arrow.bmp", 0), (40, 40)))
+    for i in numbers:
+        n = int(i)
+        if n % 2 == 0:
+            x = 270
+        else:
+            x = 40
+        if n % 3 == 1:
+            y = 80
+        elif n % 3 == 2:
+            y = 250
+        else:
+            y = 420
+        Button(buttons, x, y, pygame.transform.scale(load_image("bird{}.bmp".format(i), 0), (150, 120)))
+        if bird.n == i:
+            x1 = x
+            y1 = y
+        tick = Button(buttons, -20, 0, load_image("галка.bmp", (255, 255, 255)))      
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if 0 < event.pos[0] < 40 and 0 < event.pos[1] < 40:
+                    create_particles(event.pos)
+                    click()
+                    buttons.empty()
+                    return True
+                if 40 < event.pos[0] < 190 and 80 < event.pos[1] < 200:
+                    click()
+                    create_particles(event.pos)
+                    bird.n = "1"            
+                    tick.rect.x = 160
+                    tick.rect.y = 170
+                elif 270 < event.pos[0] < 420 and 80 < event.pos[1] < 200:
+                    click()
+                    create_particles(event.pos)
+                    bird.n = "4"                   
+                    tick.rect.x = 390
+                    tick.rect.y = 170
+                elif 40 < event.pos[0] < 190 and 250 < event.pos[1] < 370:
+                    click()
+                    create_particles(event.pos)
+                    bird.n = "5"
+                    tick.rect.x = 160
+                    tick.rect.y = 340
+                elif 270 < event.pos[0] < 420 and 250 < event.pos[1] < 370:
+                    click()
+                    create_particles(event.pos)
+                    bird.n = "2"
+                    tick.rect.x = 390
+                    tick.rect.y = 340                    
+                elif 40 < event.pos[0] < 190 and 420 < event.pos[1] < 540:
+                    click()
+                    create_particles(event.pos)
+                    bird.n = "3"
+                    tick.rect.x = 160
+                    tick.rect.y = 510
+                elif 270 < event.pos[0] < 420 and 420 < event.pos[1] < 540:
+                    click()
+                    create_particles(event.pos)
+                    bird.n = "6"
+                    tick.rect.x = 390
+                    tick.rect.y = 510
+        screen.fill(pygame.Color('white'))
+        particles.update()
+        all_sprites.draw(screen)
+        buttons.draw(screen)
+        particles.draw(screen)
+        pygame.display.flip() 
+        
 def beginning():
     global best_score    
     clicked = 0
