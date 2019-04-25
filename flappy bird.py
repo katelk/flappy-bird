@@ -88,3 +88,11 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 0
+        
+def click():
+    pygame.mixer.music.load(os.path.join('data', 'click.mp3'))
+    pygame.mixer.music.play()    
+
+def fly():
+    pygame.mixer.music.load(os.path.join('data', 'fly.mp3'))
+    pygame.mixer.music.play() 
