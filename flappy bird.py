@@ -96,3 +96,14 @@ def click():
 def fly():
     pygame.mixer.music.load(os.path.join('data', 'fly.mp3'))
     pygame.mixer.music.play() 
+    
+class Button(pygame.sprite.Sprite):
+    def __init__(self, group, x, y, image):
+        super().__init__(group)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+    
+    def update(self):
+        self.kill()  
