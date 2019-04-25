@@ -24,6 +24,10 @@ def load_image(name, colorkey):
         image.set_colorkey(colorkey)
     return image
 
+def terminate():
+    pygame.quit()
+    sys.exit()
+    
 def start_screen():
     intro_text = ["", "", "", "", "",
                   "           WELCOME TO FLAPPY BIRD GAME", "",
@@ -56,6 +60,42 @@ def start_screen():
         pygame.display.flip()
 
 running = start_screen()
+
+class Bird(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+        self.n = "1"
+        self.image = load_image("bird{}.1.bmp".format(self.n), (255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (70, 55))
+        self.rect = self.image.get_rect()
+        self.rect.x = 200
+        self.rect.y = 210
+    
+    def update(self):
+        if self.rext.y == 655:
+            all_sprites.remove(self)
+            
+class Tube(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+        self.image = pygame.transform.scale(load_image("труба.bmp", (255, 255, 255)), (100, 1010))
+        self.rect = self.image.get_rect()
+        self.rect.x = 500
+        self.rect.y = random.randint(-310, 0)
+        self.mask = pygame.mask.from_surface(self.image)
+        
+    def update(self, n):
+        if n == 0:
+            self.rect.x -= 2
+            if self.rect.x < -100:
+                self.kill()
+            if self.rect.x == 270:
+                tubes.add(Tube(all_sprites))
+            if self.rect.x == 200:
+                return True
+            return False
+        else:
+            self.kill()
 
 class Particle(pygame.sprite.Sprite):
     def __init__(self, pos, dx, dy):
@@ -109,4 +149,21 @@ class Button(pygame.sprite.Sprite):
         self.rect.y = y
     
     def update(self):
-        self.kill()  
+        self.kill() 
+        
+screen_rect = (0, 0, 500, 600)        
+best_score = 0
+result = 0
+
+
+
+background = Background(all_sprites)
+bird = Bird(all_sprites)           
+MYEVENTTYPE = 30
+pygame.time.set_timer(MYEVENTTYPE, 20)
+clock = pygame.time.Clock()
+
+while running:
+    if beginning():
+        pass
+pygame.quit()
