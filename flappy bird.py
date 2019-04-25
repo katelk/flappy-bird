@@ -79,3 +79,11 @@ def create_particles(position):
     numbers = range(-5, 6)
     for _ in range(particle_count):
         Particle(position, random.choice(numbers), random.choice(numbers)) 
+
+class Background(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+        self.image = load_image("фон.png", 0)
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
