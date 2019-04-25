@@ -156,6 +156,54 @@ best_score = 0
 result = 0
 
 
+def beginning():
+    global best_score    
+    clicked = 0
+    bird.rect.x = 200
+    bird.rect.y = 210
+    button_play = Button(buttons, 100, 300, load_image("начать.png", 0))
+    button_shop = Button(buttons, 450, 10, pygame.transform.scale(load_image("магазин.png", 0), (40, 40)))
+    button_exit = Button(buttons, 145, 410, pygame.transform.scale(load_image("exit.bmp", 0), (210, 75)))
+    best = Button(buttons, 0, 0, pygame.transform.scale(load_image("best.bmp", (255, 255, 255)), (200, 40)))
+    vy = 5
+    for i in range(len(str(best_score))):
+        Button(buttons, i*25, 40, pygame.transform.scale(load_image("{}.bmp".format(str(best_score)[i]), (255, 255, 255)), (25, 30)))    
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == MYEVENTTYPE:
+                bird.rect.y += vy/1            
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:              
+                if 100 < event.pos[0] < 400 and 300 < event.pos[1] < 400:
+                    click()
+                    buttons.empty()
+                    if play():
+                        return True
+                if 450 < event.pos[0] < 490 and 10 < event.pos[1] < 50:
+                    click()
+                    if shop():
+                        return True
+                if 145 < event.pos[0] < 355 and 410 < event.pos[1] < 585:
+                    click()
+                    terminate()               
+                vy = 5
+            clicked += 1
+            if clicked and clicked > 20:
+                bird.image = load_image("bird{}.1.bmp".format(bird.n), (255, 255, 255))
+                bird.image = pygame.transform.scale(bird.image, (70, 55))
+                vy = 2
+                if clicked == 40:
+                    clicked = 0
+            else:
+                bird.image = load_image("bird{}.2.bmp".format(bird.n), (255, 255, 255))
+                bird.image = pygame.transform.scale(bird.image, (70, 55))
+                vy = -2
+        screen.fill(pygame.Color('white')) 
+        all_sprites.draw(screen)
+        buttons.draw(screen)
+        pygame.display.flip()
+
 
 background = Background(all_sprites)
 bird = Bird(all_sprites)           
