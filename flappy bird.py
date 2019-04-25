@@ -155,6 +155,46 @@ screen_rect = (0, 0, 500, 600)
 best_score = 0
 result = 0
 
+def play():
+    global best_score, result
+    clicked = 0
+    result = 0
+    tubes.add(Tube(all_sprites))
+    vy = 6
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == 32:
+                    if pause():
+                        pass
+            if event.type == MYEVENTTYPE:
+                bird.rect.y += vy/1
+                for i in tubes:
+                    if i.update(0):
+                        result += 1
+                for i in tubes:
+                    if pygame.sprite.collide_mask(bird, i) or bird.rect.y >= 655 or bird.rect.y <= -55:
+                        if game_over():
+                            return True
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                fly()
+                bird.image = load_image("bird{}.2.bmp".format(bird.n), (255, 255, 255))
+                bird.image = pygame.transform.scale(bird.image, (70, 55))
+                vy = -7
+                clicked = 0
+            else:
+                clicked += 1
+                if clicked and clicked > 7:
+                    bird.image = load_image("bird{}.1.bmp".format(bird.n), (255, 255, 255))
+                    bird.image = pygame.transform.scale(bird.image, (70, 55))
+                    vy = 6
+                    clicked = 0
+            vy += 0.25
+        screen.fill(pygame.Color('white')) 
+        all_sprites.draw(screen)
+        pygame.display.flip()
 
 def beginning():
     global best_score    
