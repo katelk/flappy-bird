@@ -155,6 +155,55 @@ screen_rect = (0, 0, 500, 600)
 best_score = 0
 result = 0
 
+def game_over():
+    global best_score, result
+    pygame.mixer.music.load(os.path.join('data', 'fall.mp3'))
+    pygame.mixer.music.play()    
+    if result > best_score:
+        best_score = result
+    vy = 15
+    over = Button(buttons, 50, 200, pygame.transform.scale(load_image("конец.png", 0), (400, 72)))
+    score = Button(buttons, 200, 272, pygame.transform.scale(load_image("score.bmp", (255, 255, 255)), (100, 40)))
+    for i in range(len(str(result))):
+        Button(buttons, 230 + i*25, 312, pygame.transform.scale(load_image("{}.bmp".format(str(result)[i]), (255, 255, 255)), (25, 30)))    
+    best = Button(buttons, 150, 342, pygame.transform.scale(load_image("best.bmp", (255, 255, 255)), (200, 40)))
+    for i in range(len(str(best_score))):
+        Button(buttons, 230 + i*25, 382, pygame.transform.scale(load_image("{}.bmp".format(str(best_score)[i]), (255, 255, 255)), (25, 30)))    
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == MYEVENTTYPE:
+                bird.rect.y += vy/1
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:                 
+                if 50 < event.pos[0] < 450 and 200 < event.pos[1] < 272:
+                    click()                    
+                    buttons.empty()
+                    tubes.update(1)
+                    result = 0
+                    return True
+        screen.fill(pygame.Color('white'))
+        all_sprites.draw(screen)
+        buttons.draw(screen)
+        pygame.display.flip()
+        
+def pause():
+    click()
+    button_play1 = Button(buttons, 100, 300, load_image("pause.png", 0))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:              
+                if 100 < event.pos[0] < 400 and 300 < event.pos[1] < 400:
+                    buttons.remove(button_play1)
+                    return True
+
+        screen.fill(pygame.Color('white')) 
+        all_sprites.draw(screen)
+        buttons.draw(screen)
+        pygame.display.flip() 
+
 def play():
     global best_score, result
     clicked = 0
