@@ -6,6 +6,7 @@ import sys
 pygame.init()
 screen = pygame.display.set_mode([500, 600])
 screen.fill(pygame.Color('blue'))
+particles = pygame.sprite.Group()
 
 
 def load_image(name, colorkey):
@@ -51,3 +52,30 @@ def start_screen():
         pygame.display.flip()
 
 running = start_screen()
+
+class Particle(pygame.sprite.Sprite):
+    def __init__(self, pos, dx, dy):
+        super().__init__(particles)
+        self.fire = [load_image(random.choice(["хлопушка1.bmp", "хлопушка2.bmp", "хлопушка3.bmp"]), (255, 255, 255))]
+        for scale in (5, 10, 20):
+            self.fire.append(pygame.transform.scale(self.fire[0], (scale, scale)))        
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+
+        self.gravity = 0.2
+
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+            
+def create_particles(position):
+    particle_count = 50
+    numbers = range(-5, 6)
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers)) 
