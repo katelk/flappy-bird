@@ -29,7 +29,8 @@ def load_image(name, colorkey):
 def terminate():
     pygame.quit()
     sys.exit()
-
+ 
+ 
 def start_screen():
     intro_text = ["", "", "", "", "",
                   "           WELCOME TO FLAPPY BIRD GAME", "",
@@ -38,6 +39,7 @@ def start_screen():
                   "                Нажми, чтобы начать играть",
                   "                                 ---------->",
                   "                       P.s. пробел = пауза"]
+ 
     fon = pygame.transform.scale(load_image('фон.png', 0), (500, 600))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
@@ -50,6 +52,7 @@ def start_screen():
         intro_rect.x = 10
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
+ 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -60,6 +63,7 @@ def start_screen():
         pygame.display.flip()
 
 running = start_screen()
+
 
 class Bird(pygame.sprite.Sprite):
     def __init__(self, group):
@@ -84,7 +88,8 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 0
-        
+
+
 class Tube(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -106,6 +111,7 @@ class Tube(pygame.sprite.Sprite):
             return False
         else:
             self.kill()
+
             
 class Coin(pygame.sprite.Sprite):
     def __init__(self, group):
@@ -115,7 +121,6 @@ class Coin(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 635
         self.rect.y = random.randint(100, 400)
-        
         
     def update(self, n):
         if n == 0:
@@ -148,24 +153,29 @@ class Particle(pygame.sprite.Sprite):
         self.rect.y += self.velocity[1]
         if not self.rect.colliderect(screen_rect):
             self.kill()
+
             
 def create_particles(position):
     particle_count = 50
     numbers = range(-5, 6)
     for _ in range(particle_count):
         Particle(position, random.choice(numbers), random.choice(numbers))
+
         
 def click():
     pygame.mixer.music.load(os.path.join('data', 'click.mp3'))
     pygame.mixer.music.play()  
+
     
 def buy():
     pygame.mixer.music.load(os.path.join('data', 'монеты.mp3'))
     pygame.mixer.music.play()      
 
+
 def fly():
     pygame.mixer.music.load(os.path.join('data', 'fly.mp3'))
     pygame.mixer.music.play()   
+
     
 class Button(pygame.sprite.Sprite):
     def __init__(self, group, x, y, image):
@@ -182,6 +192,7 @@ screen_rect = (0, 0, 500, 600)
 best_score = 0
 result = 0
 money = 0
+
 
 def game_over():
     global best_score, result, money_new
@@ -219,6 +230,7 @@ def game_over():
         all_sprites.draw(screen)
         buttons.draw(screen)
         pygame.display.flip()
+
         
 def pause():
     click()
@@ -236,7 +248,8 @@ def pause():
         all_sprites.draw(screen)
         buttons.draw(screen)
         pygame.display.flip()        
-    
+
+        
 def shop():
     global money
     screen_rect = (0, 0, 500, 600)
@@ -329,6 +342,7 @@ def shop():
                         tick.rect.x = 390
                         tick.rect.y = 170
                         click()
+                        
                 elif 40 < event.pos[0] < 190 and 250 < event.pos[1] < 370:
                     if 5 not in bird.away:
                         if money >= 10:
@@ -348,6 +362,7 @@ def shop():
                         tick.rect.x = 160
                         tick.rect.y = 340
                         click()
+                        
                 elif 270 < event.pos[0] < 420 and 250 < event.pos[1] < 370:
                     if 2 not in bird.away:
                         if money >= 15:
@@ -367,6 +382,7 @@ def shop():
                         tick.rect.x = 390
                         tick.rect.y = 340
                         click()
+                        
                 elif 40 < event.pos[0] < 190 and 420 < event.pos[1] < 540:
                     if 3 not in bird.away:
                         if money >= 25:
@@ -412,6 +428,7 @@ def shop():
         buttons.draw(screen)
         particles.draw(screen)
         pygame.display.flip() 
+        
         
 def play():
     global best_score, result, money, money_new
@@ -465,6 +482,7 @@ def play():
         screen.fill(pygame.Color('white')) 
         all_sprites.draw(screen)
         pygame.display.flip()            
+
 
 def beginning():
     global best_score, money    
