@@ -342,6 +342,7 @@ def shop():
                         tick.rect.x = 390
                         tick.rect.y = 170
                         click()
+                        bird.n = "4"
                         
                 elif 40 < event.pos[0] < 190 and 250 < event.pos[1] < 370:
                     if 5 not in bird.away:
@@ -362,6 +363,7 @@ def shop():
                         tick.rect.x = 160
                         tick.rect.y = 340
                         click()
+                        bird.n = "5"
                         
                 elif 270 < event.pos[0] < 420 and 250 < event.pos[1] < 370:
                     if 2 not in bird.away:
@@ -382,6 +384,7 @@ def shop():
                         tick.rect.x = 390
                         tick.rect.y = 340
                         click()
+                        bird.n = "2"
                         
                 elif 40 < event.pos[0] < 190 and 420 < event.pos[1] < 540:
                     if 3 not in bird.away:
@@ -402,6 +405,8 @@ def shop():
                         tick.rect.x = 160
                         tick.rect.y = 510
                         click()
+                        bird.n = "3"
+                        
                 elif 270 < event.pos[0] < 420 and 420 < event.pos[1] < 540:
                     if 6 not in bird.away:
                         if money >= 50:
@@ -421,6 +426,7 @@ def shop():
                         tick.rect.x = 390
                         tick.rect.y = 510   
                         click()
+                        bird.n = "6"
                     
         screen.fill(pygame.Color('white'))
         particles.update()
