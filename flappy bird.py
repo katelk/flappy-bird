@@ -7,10 +7,11 @@ pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode([500, 600])
 screen.fill(pygame.Color('blue'))
-particles = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 buttons = pygame.sprite.Group()
 tubes = pygame.sprite.Group()
+coins = pygame.sprite.Group()
+particles = pygame.sprite.Group()
 
 
 def load_image(name, colorkey):
@@ -24,10 +25,11 @@ def load_image(name, colorkey):
         image.set_colorkey(colorkey)
     return image
 
+
 def terminate():
     pygame.quit()
     sys.exit()
-    
+
 def start_screen():
     intro_text = ["", "", "", "", "",
                   "           WELCOME TO FLAPPY BIRD GAME", "",
@@ -36,7 +38,6 @@ def start_screen():
                   "                Нажми, чтобы начать играть",
                   "                                 ---------->",
                   "                       P.s. пробел = пауза"]
- 
     fon = pygame.transform.scale(load_image('фон.png', 0), (500, 600))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
@@ -49,7 +50,6 @@ def start_screen():
         intro_rect.x = 10
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
- 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -70,11 +70,21 @@ class Bird(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = 200
         self.rect.y = 210
+        self.away = [1]
     
     def update(self):
         if self.rext.y == 655:
             all_sprites.remove(self)
-            
+
+
+class Background(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+        self.image = load_image("фон.png", 0)
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+        
 class Tube(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -96,6 +106,27 @@ class Tube(pygame.sprite.Sprite):
             return False
         else:
             self.kill()
+            
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+        self.image = load_image("coin2.jpg", (0, 0, 0))
+        self.image = pygame.transform.scale(self.image, (38, 38))
+        self.rect = self.image.get_rect()
+        self.rect.x = 635
+        self.rect.y = random.randint(100, 400)
+        
+        
+    def update(self, n):
+        if n == 0:
+            self.rect.x -= 2
+            if self.rect.x < -40:
+                self.kill()
+            if self.rect.x == 405:
+                coins.add(Coin(all_sprites))
+        else:
+            self.kill()
+
 
 class Particle(pygame.sprite.Sprite):
     def __init__(self, pos, dx, dy):
@@ -122,23 +153,19 @@ def create_particles(position):
     particle_count = 50
     numbers = range(-5, 6)
     for _ in range(particle_count):
-        Particle(position, random.choice(numbers), random.choice(numbers)) 
-
-class Background(pygame.sprite.Sprite):
-    def __init__(self, group):
-        super().__init__(group)
-        self.image = load_image("фон.png", 0)
-        self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
+        Particle(position, random.choice(numbers), random.choice(numbers))
         
 def click():
     pygame.mixer.music.load(os.path.join('data', 'click.mp3'))
-    pygame.mixer.music.play()    
+    pygame.mixer.music.play()  
+    
+def buy():
+    pygame.mixer.music.load(os.path.join('data', 'монеты.mp3'))
+    pygame.mixer.music.play()      
 
 def fly():
     pygame.mixer.music.load(os.path.join('data', 'fly.mp3'))
-    pygame.mixer.music.play() 
+    pygame.mixer.music.play()   
     
 class Button(pygame.sprite.Sprite):
     def __init__(self, group, x, y, image):
@@ -149,14 +176,15 @@ class Button(pygame.sprite.Sprite):
         self.rect.y = y
     
     def update(self):
-        self.kill() 
-        
+        self.kill()                
+
 screen_rect = (0, 0, 500, 600)        
 best_score = 0
 result = 0
+money = 0
 
 def game_over():
-    global best_score, result
+    global best_score, result, money_new
     pygame.mixer.music.load(os.path.join('data', 'fall.mp3'))
     pygame.mixer.music.play()    
     if result > best_score:
@@ -168,7 +196,11 @@ def game_over():
         Button(buttons, 230 + i*25, 312, pygame.transform.scale(load_image("{}.bmp".format(str(result)[i]), (255, 255, 255)), (25, 30)))    
     best = Button(buttons, 150, 342, pygame.transform.scale(load_image("best.bmp", (255, 255, 255)), (200, 40)))
     for i in range(len(str(best_score))):
-        Button(buttons, 230 + i*25, 382, pygame.transform.scale(load_image("{}.bmp".format(str(best_score)[i]), (255, 255, 255)), (25, 30)))    
+        Button(buttons, 230 + i*25, 382, pygame.transform.scale(load_image("{}.bmp".format(str(best_score)[i]), (255, 255, 255)), (25, 30)))  
+    for i in range(len(str(money_new))):
+        Button(buttons, 230 + i*25, 442, pygame.transform.scale(load_image("{}.bmp".format(str(money_new)[i]), (255, 255, 255)), (25, 30)))  
+    plus = Button(buttons, 205, 442, pygame.transform.scale(load_image("+.bmp", (255, 255, 255)), (25, 25)))
+    mon = Button(buttons, 280, 442, pygame.transform.scale(load_image("coin2.jpg", (0, 0, 0)), (32, 32)))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -180,6 +212,7 @@ def game_over():
                     click()                    
                     buttons.empty()
                     tubes.update(1)
+                    coins.update(1)
                     result = 0
                     return True
         screen.fill(pygame.Color('white'))
@@ -202,13 +235,191 @@ def pause():
         screen.fill(pygame.Color('white')) 
         all_sprites.draw(screen)
         buttons.draw(screen)
+        pygame.display.flip()        
+    
+def shop():
+    global money
+    screen_rect = (0, 0, 500, 600)
+    bird.rect.x = 0
+    bird.rect.y = -60
+    buttons.empty()
+    numbers = "123456"
+    x1 = 0
+    y1= 0
+    button_back = Button(buttons, 0, 0, pygame.transform.scale(load_image("arrow.bmp", 0), (40, 40)))
+    for i in range(len(str(5))):
+        Button(buttons, 270 + i*25, 205, pygame.transform.scale(load_image("{}.bmp".format(str(5)[i]), (255, 255, 255)), (25, 30)))
+    for i in range(len(str(10))):
+        Button(buttons, 40 + i*25, 375, pygame.transform.scale(load_image("{}.bmp".format(str(10)[i]), (255, 255, 255)), (25, 30)))
+    for i in range(len(str(15))):
+        Button(buttons, 270 + i*25, 375, pygame.transform.scale(load_image("{}.bmp".format(str(15)[i]), (255, 255, 255)), (25, 30)))
+    for i in range(len(str(25))):
+        Button(buttons, 40 + i*25, 555, pygame.transform.scale(load_image("{}.bmp".format(str(25)[i]), (255, 255, 255)), (25, 30)))
+    for i in range(len(str(50))):
+        Button(buttons, 270 + i*25, 555, pygame.transform.scale(load_image("{}.bmp".format(str(50)[i]), (255, 255, 255)), (25, 30)))
+    mon = Button(buttons, 450, 0, pygame.transform.scale(load_image("coin2.jpg", (0, 0, 0)), (43, 43)))
+    sel = Button(buttons, 40, 205, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+    for i in range(len(str(money))):
+        Button(buttons, 350 + i*25, 10, pygame.transform.scale(load_image("{}.bmp".format(str(money)[i]), (255, 255, 255)), (25, 30)))    
+    
+    for i in numbers:
+        n = int(i)
+        if n % 2 == 0:
+            x = 270
+        else:
+            x = 40
+        if n % 3 == 1:
+            y = 80
+        elif n % 3 == 2:
+            y = 250
+        else:
+            y = 420
+        Button(buttons, x, y, pygame.transform.scale(load_image("bird{}.3.bmp".format(i), 0), (150, 120)))
+        if 2 in bird.away:
+            bird2 = Button(buttons, 270, 250, pygame.transform.scale(load_image("bird2.bmp", (255, 255, 255)), (150, 120)))
+            sel2 = Button(buttons, 270, 375, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))            
+        if 3 in bird.away:
+            bird3 = Button(buttons, 40, 420, pygame.transform.scale(load_image("bird3.bmp", (255, 255, 255)), (150, 120)))
+            sel3 = Button(buttons, 40, 555, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+        if 4 in bird.away:
+            bird4 = Button(buttons, 270, 80, pygame.transform.scale(load_image("bird4.bmp", (255, 255, 255)), (150, 120)))
+            sel4 = Button(buttons, 270, 205, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+        if 5 in bird.away:
+            bird5 = Button(buttons, 40, 250, pygame.transform.scale(load_image("bird5.bmp", (255, 255, 255)), (150, 120)))
+            sel5 = Button(buttons, 40, 375, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+        if 6 in bird.away:
+            bird6 = Button(buttons, 270, 420, pygame.transform.scale(load_image("bird6.bmp", (255, 255, 255)), (150, 120)))
+            sel6 = Button(buttons, 270, 555, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))            
+                    
+        if bird.n == i:
+            x1 = x
+            y1 = y
+        tick = Button(buttons, -20, 0, load_image("галка.bmp", (255, 255, 255)))
+        bird1 = Button(buttons, 40, 80, pygame.transform.scale(load_image("bird1.bmp", (255, 255, 255)), (150, 120)))      
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if 0 < event.pos[0] < 40 and 0 < event.pos[1] < 40:
+                    click()
+                    buttons.empty()
+                    return True
+                if 40 < event.pos[0] < 190 and 80 < event.pos[1] < 200:
+                    click()
+                    bird.n = "1"            
+                    tick.rect.x = 160
+                    tick.rect.y = 170
+                elif 270 < event.pos[0] < 420 and 80 < event.pos[1] < 200:
+                    if 4 not in bird.away:
+                        if money >= 5:
+                            bird4 = Button(buttons, 270, 80, pygame.transform.scale(load_image("bird4.bmp", (255, 255, 255)), (150, 120)))
+                            sel4 = Button(buttons, 270, 205, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+                            buy()
+                            money = money - 5
+                            create_particles(event.pos)
+                            bird.n = "4"                   
+                            tick.rect.x = 390
+                            tick.rect.y = 170
+                            sky = Button(buttons, 300, 10, pygame.transform.scale(load_image("sky.png", (255, 255, 255)), (150, 30)))
+                            for i in range(len(str(money))):
+                                Button(buttons, 350 + i*25, 10, pygame.transform.scale(load_image("{}.bmp".format(str(money)[i]), (255, 255, 255)), (25, 30))) 
+                            bird.away.append(4)
+                    else:
+                        tick.rect.x = 390
+                        tick.rect.y = 170
+                        click()
+                elif 40 < event.pos[0] < 190 and 250 < event.pos[1] < 370:
+                    if 5 not in bird.away:
+                        if money >= 10:
+                            money = money - 10
+                            bird5 = Button(buttons, 40, 250, pygame.transform.scale(load_image("bird5.bmp", (255, 255, 255)), (150, 120)))
+                            sel5 = Button(buttons, 40, 375, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+                            buy()
+                            create_particles(event.pos)
+                            bird.n = "5"
+                            tick.rect.x = 160
+                            tick.rect.y = 340
+                            sky = Button(buttons, 300, 10, pygame.transform.scale(load_image("sky.png", (255, 255, 255)), (150, 30)))
+                            for i in range(len(str(money))):
+                                Button(buttons, 350 + i*25, 10, pygame.transform.scale(load_image("{}.bmp".format(str(money)[i]), (255, 255, 255)), (25, 30)))
+                            bird.away.append(5)
+                    else:
+                        tick.rect.x = 160
+                        tick.rect.y = 340
+                        click()
+                elif 270 < event.pos[0] < 420 and 250 < event.pos[1] < 370:
+                    if 2 not in bird.away:
+                        if money >= 15:
+                            bird2 = Button(buttons, 270, 250, pygame.transform.scale(load_image("bird2.bmp", (255, 255, 255)), (150, 120)))
+                            sel2 = Button(buttons, 270, 375, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+                            buy()
+                            money -= 15
+                            create_particles(event.pos)
+                            bird.n = "2"
+                            tick.rect.x = 390
+                            tick.rect.y = 340 
+                            sky = Button(buttons, 300, 10, pygame.transform.scale(load_image("sky.png", (255, 255, 255)), (150, 30)))
+                            for i in range(len(str(money))):
+                                Button(buttons, 350 + i*25, 10, pygame.transform.scale(load_image("{}.bmp".format(str(money)[i]), (255, 255, 255)), (25, 30)))
+                            bird.away.append(2)
+                    else:
+                        tick.rect.x = 390
+                        tick.rect.y = 340
+                        click()
+                elif 40 < event.pos[0] < 190 and 420 < event.pos[1] < 540:
+                    if 3 not in bird.away:
+                        if money >= 25:
+                            bird3 = Button(buttons, 40, 420, pygame.transform.scale(load_image("bird3.bmp", (255, 255, 255)), (150, 120)))
+                            sel3 = Button(buttons, 40, 555, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+                            buy()
+                            money -= 25
+                            create_particles(event.pos)
+                            bird.n = "3"
+                            tick.rect.x = 160
+                            tick.rect.y = 510
+                            sky = Button(buttons, 300, 10, pygame.transform.scale(load_image("sky.png", (255, 255, 255)), (150, 30)))
+                            for i in range(len(str(money))):
+                                Button(buttons, 350 + i*25, 10, pygame.transform.scale(load_image("{}.bmp".format(str(money)[i]), (255, 255, 255)), (25, 30)))
+                            bird.away.append(3)
+                    else:
+                        tick.rect.x = 160
+                        tick.rect.y = 510
+                        click()
+                elif 270 < event.pos[0] < 420 and 420 < event.pos[1] < 540:
+                    if 6 not in bird.away:
+                        if money >= 50:
+                            bird6 = Button(buttons, 270, 420, pygame.transform.scale(load_image("bird6.bmp", (255, 255, 255)), (150, 120)))
+                            sel6 = Button(buttons, 270, 555, pygame.transform.scale(load_image("selected.bmp", (255, 255, 255)), (100, 30)))
+                            buy()
+                            money -= 50
+                            create_particles(event.pos)
+                            bird.n = "6"
+                            tick.rect.x = 390
+                            tick.rect.y = 510   
+                            sky = Button(buttons, 300, 10, pygame.transform.scale(load_image("sky.png", (255, 255, 255)), (150, 30)))
+                            for i in range(len(str(money))):
+                                Button(buttons, 350 + i*25, 10, pygame.transform.scale(load_image("{}.bmp".format(str(money)[i]), (255, 255, 255)), (25, 30)))
+                            bird.away.append(6)
+                    else:
+                        tick.rect.x = 390
+                        tick.rect.y = 510   
+                        click()
+                    
+        screen.fill(pygame.Color('white'))
+        particles.update()
+        all_sprites.draw(screen)
+        buttons.draw(screen)
+        particles.draw(screen)
         pygame.display.flip() 
-
+        
 def play():
-    global best_score, result
+    global best_score, result, money, money_new
     clicked = 0
     result = 0
+    money_new = 0
     tubes.add(Tube(all_sprites))
+    coins.add(Coin(all_sprites))
     vy = 6
     while True:
         for event in pygame.event.get():
@@ -227,6 +438,16 @@ def play():
                     if pygame.sprite.collide_mask(bird, i) or bird.rect.y >= 655 or bird.rect.y <= -55:
                         if game_over():
                             return True
+                for i in coins:
+                    if i.update(0):
+                        result += 1
+                for i in coins:
+                    if pygame.sprite.collide_mask(bird, i):
+                        money += 1
+                        money_new += 1
+                        pygame.mixer.music.load(os.path.join('data', 'дзынь.mp3')) 
+                        pygame.mixer.music.play()    
+                        i.kill()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 fly()
                 bird.image = load_image("bird{}.2.bmp".format(bird.n), (255, 255, 255))
@@ -243,99 +464,24 @@ def play():
             vy += 0.25
         screen.fill(pygame.Color('white')) 
         all_sprites.draw(screen)
-        pygame.display.flip()
+        pygame.display.flip()            
 
-def shop():
-    screen_rect = (0, 0, 500, 600)
-    bird.rect.x = 0
-    bird.rect.y = -60
-    buttons.empty()
-    numbers = "123456"
-    x1 = 0
-    y1= 0
-    button_back = Button(buttons, 0, 0, pygame.transform.scale(load_image("arrow.bmp", 0), (40, 40)))
-    for i in numbers:
-        n = int(i)
-        if n % 2 == 0:
-            x = 270
-        else:
-            x = 40
-        if n % 3 == 1:
-            y = 80
-        elif n % 3 == 2:
-            y = 250
-        else:
-            y = 420
-        Button(buttons, x, y, pygame.transform.scale(load_image("bird{}.bmp".format(i), 0), (150, 120)))
-        if bird.n == i:
-            x1 = x
-            y1 = y
-        tick = Button(buttons, -20, 0, load_image("галка.bmp", (255, 255, 255)))      
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if 0 < event.pos[0] < 40 and 0 < event.pos[1] < 40:
-                    create_particles(event.pos)
-                    click()
-                    buttons.empty()
-                    return True
-                if 40 < event.pos[0] < 190 and 80 < event.pos[1] < 200:
-                    click()
-                    create_particles(event.pos)
-                    bird.n = "1"            
-                    tick.rect.x = 160
-                    tick.rect.y = 170
-                elif 270 < event.pos[0] < 420 and 80 < event.pos[1] < 200:
-                    click()
-                    create_particles(event.pos)
-                    bird.n = "4"                   
-                    tick.rect.x = 390
-                    tick.rect.y = 170
-                elif 40 < event.pos[0] < 190 and 250 < event.pos[1] < 370:
-                    click()
-                    create_particles(event.pos)
-                    bird.n = "5"
-                    tick.rect.x = 160
-                    tick.rect.y = 340
-                elif 270 < event.pos[0] < 420 and 250 < event.pos[1] < 370:
-                    click()
-                    create_particles(event.pos)
-                    bird.n = "2"
-                    tick.rect.x = 390
-                    tick.rect.y = 340                    
-                elif 40 < event.pos[0] < 190 and 420 < event.pos[1] < 540:
-                    click()
-                    create_particles(event.pos)
-                    bird.n = "3"
-                    tick.rect.x = 160
-                    tick.rect.y = 510
-                elif 270 < event.pos[0] < 420 and 420 < event.pos[1] < 540:
-                    click()
-                    create_particles(event.pos)
-                    bird.n = "6"
-                    tick.rect.x = 390
-                    tick.rect.y = 510
-        screen.fill(pygame.Color('white'))
-        particles.update()
-        all_sprites.draw(screen)
-        buttons.draw(screen)
-        particles.draw(screen)
-        pygame.display.flip() 
-        
 def beginning():
-    global best_score    
+    global best_score, money    
     clicked = 0
     bird.rect.x = 200
     bird.rect.y = 210
     button_play = Button(buttons, 100, 300, load_image("начать.png", 0))
-    button_shop = Button(buttons, 450, 10, pygame.transform.scale(load_image("магазин.png", 0), (40, 40)))
+    button_shop = Button(buttons, 450, 10, pygame.transform.scale(load_image("магазин.png", 0), (50, 50)))
     button_exit = Button(buttons, 145, 410, pygame.transform.scale(load_image("exit.bmp", 0), (210, 75)))
     best = Button(buttons, 0, 0, pygame.transform.scale(load_image("best.bmp", (255, 255, 255)), (200, 40)))
+    mon = Button(buttons, 0, 60, pygame.transform.scale(load_image("coin2.jpg", (0, 0, 0)), (40, 40)))
+    
     vy = 5
     for i in range(len(str(best_score))):
-        Button(buttons, i*25, 40, pygame.transform.scale(load_image("{}.bmp".format(str(best_score)[i]), (255, 255, 255)), (25, 30)))    
+        Button(buttons, 220 + i*25, 10, pygame.transform.scale(load_image("{}.bmp".format(str(best_score)[i]), (255, 255, 255)), (25, 30)))
+    for i in range(len(str(money))):
+        Button(buttons, 60 + i*25, 65, pygame.transform.scale(load_image("{}.bmp".format(str(money)[i]), (255, 255, 255)), (25, 30)))    
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -371,8 +517,8 @@ def beginning():
         all_sprites.draw(screen)
         buttons.draw(screen)
         pygame.display.flip()
-
-
+        
+        
 background = Background(all_sprites)
 bird = Bird(all_sprites)           
 MYEVENTTYPE = 30
